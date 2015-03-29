@@ -1,4 +1,4 @@
-## Redmine omniauth google
+## Redmine omniauth google(Redmine3.0.0対応)
 
 This plugin is used to authenticate Redmine users using Google's OAuth2 provider.
 
@@ -8,7 +8,7 @@ Download the plugin and install required gems:
 
 ```console
 cd /path/to/redmine/plugins
-git clone https://github.com/twinslash/redmine_omniauth_google.git
+git clone https://github.com/yamamanx/redmine_omniauth_google.git
 cd /path/to/redmine
 bundle install
 ```
