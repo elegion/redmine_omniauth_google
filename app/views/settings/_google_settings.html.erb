@@ -11,6 +11,14 @@
   <%= text_area_tag "settings[allowed_domains]", @settings[:allowed_domains], :rows => 5 %>
 </p>
 <p>
+  <label>Trusted domains (auto-activate users)</label>
+  <%= text_area_tag "settings[trusted_domains]", @settings[:trusted_domains], :rows => 5 %>
+</p>
+<p>
+  <label>Groups mapping (auto-add groups)</label>
+  <%= text_area_tag "settings[group_mapping]", @settings[:group_mapping], :rows => 5 %>
+</p>
+<p>
   <label>Oauth authentification:</label>
   <%= check_box_tag "settings[oauth_authentification]", true, @settings[:oauth_authentification] %>
 </p>

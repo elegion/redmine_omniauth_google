@@ -65,8 +65,20 @@ class RedmineOauthController < AccountController
           onthefly_creation_failed(user)
         end
       else
-        register_manually_by_administrator(user) do
-          onthefly_creation_failed(user)
+        hd = info["hd"]
+        if hd.present? && trusted_domain?(hd)
+          user.activate
+          if user.save
+            user_mapped_groups(hd).each { |g| g.users << user }
+            flash[:notice] = l(:notice_account_activated)
+            redirect_to(my_account_path)
+          else
+            onthefly_creation_failed(user)
+          end
+        else
+          register_manually_by_administrator(user) do
+            onthefly_creation_failed(user)
+          end
         end
       end
     else
