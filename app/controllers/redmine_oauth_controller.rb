@@ -84,6 +84,7 @@ class RedmineOauthController < AccountController
     else
       # Existing record
       if user.active?
+        user.update_column(:last_login_on, Time.now)
         successful_authentication(user)
       else
         # Redmine 2.4 adds an argument to account_pending
