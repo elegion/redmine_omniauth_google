@@ -36,22 +36,26 @@ class RedmineOauthController < AccountController
   end
 
   def try_to_login info
-   params[:back_url] = session[:back_url]
-   session.delete(:back_url)
-   userFirstName,userLastName = info["name"].split(' ') unless info['name'].nil?
-   userFirstName ||= info[:given_name]
-   userLastName ||= info[:family_name]
-   userLoginName = parse_email(info["email"])[:login]
-   userLoginName ||= [userFirstName, userLastName]*"."
-   user = User.find_or_initialize_by(login: userLoginName)
-    if user.new_record?
+    params[:back_url] = session.delete(:back_url)
+    userEmail = info["email"]
+    user = User.where(login: userEmail).first
+    user = User.having_mail(userEmail).first if not user
+    if user
+      # User found, log in.
+      user.update_column(:last_login_on, Time.now)
+      user.active? ? successful_authentication(user): account_pending(user)
+    else
       # Self-registration off
       redirect_to(home_url) && return unless Setting.self_registration?
       # Create on the fly
-      user.firstname = userFirstName
-      user.lastname = userLastName
-      user.login = userLoginName
-      user.mail = info["email"]
+      firstname, lastname = info["name"].split(' ') unless info['name'].nil?
+      firstname ||= info[:given_name]
+      lastname ||= info[:family_name]
+      user = User.new
+      user.mail = userEmail
+      user.login = userEmail
+      user.firstname = firstname
+      user.lastname = lastname
       user.random_password
       user.register
 
@@ -79,20 +83,6 @@ class RedmineOauthController < AccountController
           register_manually_by_administrator(user) do
             onthefly_creation_failed(user)
           end
-        end
-      end
-    else
-      # Existing record
-      if user.active?
-        user.update_column(:last_login_on, Time.now)
-        successful_authentication(user)
-      else
-        # Redmine 2.4 adds an argument to account_pending
-        if Redmine::VERSION::MAJOR > 2 or
-          (Redmine::VERSION::MAJOR == 2 and Redmine::VERSION::MINOR >= 4)
-          account_pending(user)
-        else
-          account_pending
         end
       end
     end
